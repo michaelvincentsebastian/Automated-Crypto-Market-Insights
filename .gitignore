@@ -1,0 +1,23 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/
+*.ipynb_checkpoints/
+.ipynb_checkpoints/
+dist/
+build/
+*.egg-info/
+
+# Database
+database/*.db # Untuk file SQLite
+database/*.sqlite # Jika ekstensi Anda .sqlite
+
+# Logs
+*.log
