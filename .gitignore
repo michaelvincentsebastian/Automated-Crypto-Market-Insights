@@ -16,8 +16,8 @@ build/
 *.egg-info/
 
 # Database
-database/*.db # Untuk file SQLite
-database/*.sqlite # Jika ekstensi Anda .sqlite
+database/*.db
+database/*.sqlite
 
 # Logs
 *.log

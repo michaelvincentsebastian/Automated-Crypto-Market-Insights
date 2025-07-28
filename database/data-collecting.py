@@ -3,18 +3,18 @@ import json
 from requests import Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from datetime import datetime
-import time # Menggunakan time.sleep
-import os # Untuk mengakses variabel lingkungan
+import time
+import os
 
-from dotenv import load_dotenv # Import load_dotenv
-from sqlalchemy import create_engine, text # Import create_engine dan text dari sqlalchemy
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 # --- 0. Muat Variabel Lingkungan ---
 load_dotenv() # Ini akan memuat variabel dari file .env
 
 # --- Konfigurasi ---
-api_key = os.getenv('COINMARKETCAP_API_KEY') # Ambil API Key dari variabel lingkungan
-database_url = os.getenv('DATABASE_URL')     # Ambil URL Database dari variabel lingkungan
+api_key = os.getenv('coin-marketcap-api-key') # Ambil API Key dari variabel lingkungan
+database_url = os.getenv('database-url')     # Ambil URL Database dari variabel lingkungan
 
 if not api_key:
     raise ValueError("COINMARKETCAP_API_KEY tidak ditemukan di file .env. Harap tambahkan.")
@@ -24,7 +24,7 @@ if not database_url:
 API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
 API_PARAMETERS = {
     'start': '1',
-    'limit': '100', 
+    'limit': '10', 
     'convert': 'USD'
 }
 
@@ -96,10 +96,11 @@ def fetch_and_save_data():
         response.raise_for_status() # Akan memunculkan HTTPError untuk status kode 4xx/5xx
         data = json.loads(response.text)
         
-        # Normalisasi JSON dan pilih kolom yang relevan
+        # Normalisasi JSON
         df_new_data = pd.json_normalize(data['data'])
-        
+
         # Ubah nama kolom yang berakar dari nested JSON (quote.USD.xxx)
+        # Hapus 'quote.USD.last_updated' dari rename, karena kita akan ambil 'last_updated' yang global
         df_new_data = df_new_data.rename(columns={
             'quote.USD.price': 'price',
             'quote.USD.volume_24h': 'volume_24h',
@@ -107,18 +108,18 @@ def fetch_and_save_data():
             'quote.USD.percent_change_1h': 'percent_change_1h',
             'quote.USD.percent_change_24h': 'percent_change_24h',
             'quote.USD.percent_change_7d': 'percent_change_7d',
-            'quote.USD.last_updated': 'last_updated'
+            # 'quote.USD.last_updated': 'last_updated' # HAPUS BARIS INI
         })
-        
+
         # Filter dan urutkan kolom sesuai tabel database
-        # Ambil hanya kolom yang ada di tabel Anda
+        # Pastikan 'last_updated' yang kita inginkan adalah yang di level root
         desired_columns = [
             'id', 'name', 'symbol', 'slug', 'cmc_rank',
             'price', 'volume_24h', 'market_cap',
             'percent_change_1h', 'percent_change_24h', 'percent_change_7d',
-            'last_updated' # Waktu update dari CMC
+            'last_updated' # Ini seharusnya kolom 'last_updated' yang sudah ada di root DataFrame setelah normalisasi.
         ]
-        
+
         # Pastikan kolom-kolom ini ada sebelum memilihnya
         available_columns = [col for col in desired_columns if col in df_new_data.columns]
         df_new_data = df_new_data[available_columns]
