@@ -29,7 +29,7 @@ if not database_url:
 API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
 API_PARAMETERS = {
     'start': '1',
-    'limit': '10',
+    'limit': '100', # Sesuaikan kembali ke 100 jika itu yang Anda inginkan
     'convert': 'USD'
 }
 
