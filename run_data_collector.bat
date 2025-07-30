@@ -1,4 +1,5 @@
 @echo off
+
 REM Ganti dengan jalur lengkap ke interpreter Python Anda di virtual environment
 set PYTHON_EXE="B:\GitHub Repository\Automated-Crypto-Market-Insights\venv\Scripts\python.exe"
 
