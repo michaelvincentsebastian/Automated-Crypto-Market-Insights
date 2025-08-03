@@ -14,7 +14,9 @@ set PROJECT_ROOT="B:\GitHub Repository\Automated-Crypto-Market-Insights"
 cd /d %PROJECT_ROOT%
 %PYTHON_EXE% %SCRIPT_PATH%
 
-%PYTHON_EXE% -m notebook %ANALYZE_PATH%
+cd /d %PROJECT_ROOT%
+%PYTHON_EXE% %ANALYZE_PATH%
+
 
 REM Opsional: Jeda sejenak untuk memastikan log ditulis (hanya jika dijalankan manual untuk debugging)
 REM timeout /t 5 /nobreak
