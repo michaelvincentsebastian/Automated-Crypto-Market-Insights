@@ -4,54 +4,57 @@ import plotly.express as px
 import os
 
 # =======================================================================
-# --- FUNGSI UNTUK MEMUAT DATA DARI FILE LOKAL/GITHUB ---
+# --- FUNCTION TO LOAD DATA FROM LOCAL/GITHUB FILE ---
 # =======================================================================
-# st.cache_data akan menyimpan data selama 6 menit untuk menghindari pemuatan berulang
+# st.cache_data will cache data for 6 minutes to avoid repeated loading
 @st.cache_data(ttl=360)
 def load_csv_data():
     """
-    Memuat data dari file cleaned_data.csv yang berada di direktori cleaning/.
-    Mengambil data terakhir untuk setiap koin (symbol) berdasarkan 'last_updated_utc+0'.
+    Loads data from the cleaned_data.csv file located in the cleaning/ directory.
+    Retrieves the latest data for each coin (symbol) based on 'last_updated_utc+0'.
     """
-    try:
-        df = pd.read_csv('cleaning/cleaned_data.csv')
+    file_path = 'B:\GitHub Repository\Automated-Crypto-Market-Insights\cleaning\cleaned_data.csv'
+    if not os.path.exists(file_path):
+        st.error(f"File '{file_path}' not found. Ensure you have uploaded it to the repository and it is in the correct location.")
+        st.warning("Check if you have a 'cleaning' folder and the 'cleaned_data.csv' file inside it, in the same directory as this Streamlit script.")
+        return pd.DataFrame()
         
-        # Periksa kolom 'last_updated_utc+0' dan ubah ke format datetime
+    try:
+        df = pd.read_csv(file_path)
+        
+        # Check the 'last_updated_utc+0' column and convert it to datetime format
         if 'last_updated_utc+0' in df.columns:
-            df['last_updated_utc+0'] = pd.to_datetime(df['last_updated_utc+0'])
-            # Mengambil data terbaru untuk setiap koin
-            df = df.sort_values('last_updated_utc+0').drop_duplicates(subset=['symbol'], keep='last')
-            # Hapus kolom asli setelah digunakan
+            df['last_updated'] = pd.to_datetime(df['last_updated_utc+0'])
+            # Get the latest data for each coin
+            df = df.sort_values('last_updated').drop_duplicates(subset=['symbol'], keep='last')
+            # Remove the original column after use
             df = df.drop(columns=['last_updated_utc+0'], errors='ignore')
-        elif 'last_updated_utc+0' in df.columns:
-            df['last_updated_utc+0'] = pd.to_datetime(df['last_updated_utc+0'])
-            df = df.sort_values('last_updated_utc+0').drop_duplicates(subset=['symbol'], keep='last')
+        elif 'last_updated' in df.columns:
+            df['last_updated'] = pd.to_datetime(df['last_updated'])
+            df = df.sort_values('last_updated').drop_duplicates(subset=['symbol'], keep='last')
         else:
-            st.error("Tidak ada kolom tanggal untuk memfilter data terbaru.")
+            st.error("No date column to filter the latest data. Ensure the 'last_updated_utc+0' or 'last_updated' column exists.")
             return pd.DataFrame()
         
         return df
-    except FileNotFoundError:
-        st.error("File 'cleaning/cleaned_data.csv' tidak ditemukan. Pastikan Anda telah mengunggahnya ke repositori.")
-        return pd.DataFrame()
     except Exception as e:
-        st.error(f"Terjadi kesalahan saat memuat data: {e}")
+        st.error(f"An error occurred while loading or processing the data: {e}")
         return pd.DataFrame()
 
 
 # =======================================================================
-# --- KONFIGURASI DASHBOARD STREAMLIT ---
+# --- STREAMLIT DASHBOARD CONFIGURATION ---
 # =======================================================================
-# Favicon placeholder. Ganti URL ini dengan URL logo Anda.
+# Favicon placeholder. Replace this URL with your logo URL.
 st.set_page_config(
-    page_title="Dashboard Kripto Real-Time",
+    page_title="Crypto Coin Market Cap Analytics Dashboard",
     layout="wide",
     initial_sidebar_state="expanded",
-    # Perbaikan: Menggunakan URL publik untuk favicon, bukan jalur file lokal.
-    page_icon="https://cdn.jsdelivr.net/npm/emoji-datasource-apple/img/apple/64/1f4b8.png"
+    # Fix: Using a public URL for the favicon, not a local file path.
+    page_icon="B:\GitHub Repository\Automated-Crypto-Market-Insights\img-resources\icon website.png"
 )
 
-# Injeksi CSS kustom untuk tampilan
+# Inject custom CSS for styling
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -90,16 +93,17 @@ h1, h2, h3 {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 .social-icons a {
-    color: #a4f5d8;
+    color: #fff; /* Changed color to white */
     margin-right: 15px;
-    font-size: 24px;
+    font-size: 36px; /* Increased icon size */
+    text-decoration: none; /* Removed the underline */
 }
 </style>
 """, unsafe_allow_html=True)
 
 
 # =======================================================================
-# --- STRUKTUR UI DASHBOARD ---
+# --- DASHBOARD UI STRUCTURE ---
 # =======================================================================
 
 st.title("Crypto Coin Market Cap Analytics Dashboard")
@@ -120,80 +124,86 @@ st.markdown("""
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 """, unsafe_allow_html=True)
 
-# Tambahkan tombol refresh data
-if st.button("Refresh Data", help="Ambil data terbaru dari file CSV"):
+# Add an image between the social icons and the refresh button
+st.image("https://images.unsplash.com/photo-1640161704729-cbe966a08476?q=80&w=872&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", use_container_width=True)
+
+# Add a refresh data button
+if st.button("Refresh Data", help="Fetch the latest data from the CSV file"):
     st.cache_data.clear()
     st.rerun()
 
-# Muat data
+# Load data
 df = load_csv_data()
 
-st.sidebar.header("Opsi Kustomisasi")
+st.sidebar.header("Customization Options")
 if not df.empty:
     coin_options = df['symbol'].tolist()
     selected_coins = st.sidebar.multiselect(
-        "Pilih Koin untuk Perbandingan:",
+        "Select Coins for Comparison:",
         options=coin_options,
         default=coin_options[:3] if len(coin_options) >= 3 else coin_options
     )
 
     metric_options = ['price', 'market_cap', 'volume_24h', 'percent_change_24h']
     selected_metric = st.sidebar.selectbox(
-        "Pilih Metrik untuk Analisis:",
+        "Select Metric for Analysis:",
         options=metric_options,
         index=3
     )
 
 else:
-    st.sidebar.warning("Data tidak tersedia.")
+    st.sidebar.warning("Data not available.")
 
 
 if not df.empty:
     last_updated_time = df['last_updated'].max() if 'last_updated' in df.columns else "Last update not available"
-    st.markdown(f"**Last_Update:** {last_updated_time}")
+    st.markdown(f"**Last Update:** {last_updated_time}")
 
-# --- Bagian Overview Dashboard ---
+# --- Dashboard Overview Section ---
 st.markdown("---")
 st.subheader("Overview Dashboard")
-st.info("Catatan: Data yang diambil ini ditarik dari API ke database lokal. Data hanya dapat diperbarui saat author menyalakan device dan skrip otomatis berjalan.")
+st.info("Note: This data is pulled from an API to a local database. Data can only be updated when the author turns on the device and the automated script runs.")
 
-# --- Bagian Agregasi Data ---
+# --- Aggregate Data Section ---
 st.markdown("---")
-st.subheader("Ringkasan Data Agregat")
+st.subheader("Aggregate Data Summary")
 if not df.empty:
     total_volume = df['volume_24h'].sum()
     total_market_cap = df['market_cap'].sum()
     agg_col1, agg_col2 = st.columns(2)
     with agg_col1:
-        st.metric(label="Total Volume Trading (24h)", value=f"${total_volume:,.2f}")
+        st.metric(label="Total Trading Volume (24h)", value=f"${total_volume:,.2f}")
     with agg_col2:
         st.metric(label="Total Market Cap", value=f"${total_market_cap:,.2f}")
 else:
-    st.warning("Data tidak tersedia untuk agregasi.")
+    st.warning("Data not available for aggregation.")
 
-# --- Bagian Metrik Koin Utama yang Diperbarui ---
+# --- Updated Key Coin Metrics Section ---
 st.markdown("---")
-st.subheader("Analisis Koin Utama")
+st.subheader("Key Coin Analysis")
 if not df.empty:
     col1, col2 = st.columns(2)
     
     with col1:
-        with st.container(border=True): # Menggunakan st.container sebagai box biru
-            st.markdown("<h4>Top 5 Daily Gainers 🔼</h4>", unsafe_allow_html=True)
-            with st.container(): # Box abu-abu
+        # Using st.container as a blue box with border=True for a separated look
+        with st.container(border=True): 
+            st.markdown("<h4>Top 5 Daily Gainers <i class='fas fa-arrow-trend-up' style='color:#28a745;'></i></h4>", unsafe_allow_html=True)
+            # Change st.container here for a lighter color (background-color: #2c3e50)
+            with st.container():
                 top_gainers = df.sort_values(by='percent_change_24h', ascending=False).head(5)
                 for _, row in top_gainers.iterrows():
                     st.markdown(f"<p>{row['name']} ({row['symbol']}): <span style='color: #28a745;'>{row['percent_change_24h']:.2f}%</span></p>", unsafe_allow_html=True)
     
     with col2:
+        # Using st.container as a blue box with border=True
         with st.container(border=True):
-            st.markdown("<h4>Top 5 Daily Losers 🔻</h4>", unsafe_allow_html=True)
+            st.markdown("<h4>Top 5 Daily Losers <i class='fas fa-arrow-trend-down' style='color:#dc3545;'></i></h4>", unsafe_allow_html=True)
+            # Change st.container here for a lighter color (background-color: #2c3e50)
             with st.container():
                 top_losers = df.sort_values(by='percent_change_24h', ascending=True).head(5)
                 for _, row in top_losers.iterrows():
                     st.markdown(f"<p>{row['name']} ({row['symbol']}): <span style='color: #dc3545;'>{row['percent_change_24h']:.2f}%</span></p>", unsafe_allow_html=True)
 
-    st.markdown("---")
     col3, col4 = st.columns(2)
     with col3:
         with st.container(border=True):
@@ -211,12 +221,12 @@ if not df.empty:
                 for _, row in top_market_cap_list.iterrows():
                     st.markdown(f"<p>{row['name']} ({row['symbol']}): ${row['market_cap']:.2f}</p>", unsafe_allow_html=True)
 
-# --- Bagian Visualisasi Data ---
+# --- Data Visualization Section ---
 st.markdown("---")
-st.subheader("Visualisasi Data Kripto")
+st.subheader("Crypto Data Visualization")
 if not df.empty:
-    with st.container(border=True): # Menggunakan st.container sebagai box biru
-        st.markdown("<h4>Perbandingan Metrik Koin Pilihan</h4>", unsafe_allow_html=True)
+    with st.container(border=True): # Using st.container as a blue box
+        st.markdown("<h4>Comparison of Selected Coin Metrics</h4>", unsafe_allow_html=True)
         if selected_coins:
             selected_data = df[df['symbol'].isin(selected_coins)]
             fig_compare = px.bar(
@@ -224,27 +234,27 @@ if not df.empty:
                 x='name',
                 y=selected_metric,
                 color='name',
-                title=f"Perbandingan {selected_metric.replace('_', ' ').title()}",
-                labels={'name': 'Nama Koin', selected_metric: f'{selected_metric.replace("_", " ").title()} (USD)'}
+                title=f"Comparison of {selected_metric.replace('_', ' ').title()}",
+                labels={'name': 'Coin Name', selected_metric: f'{selected_metric.replace("_", " ").title()} (USD)'}
             )
             st.plotly_chart(fig_compare, use_container_width=True)
         else:
-            st.warning("Pilih setidaknya satu koin di sidebar untuk melihat perbandingan.")
+            st.warning("Select at least one coin in the sidebar to see the comparison.")
 
 
-# --- BAGIAN TABEL DATA ---
+# --- DATA TABLE SECTION ---
 st.markdown("---")
-st.subheader("Tabel Data Kripto")
+st.subheader("Crypto Data Table")
 if not df.empty:
     st.dataframe(df.sort_values(by='cmc_rank', ascending=True)[[
         'cmc_rank', 'name', 'symbol', 'price', 'market_cap', 'volume_24h', 'percent_change_24h', 'last_updated'
     ]].rename(columns={
         'cmc_rank': 'Rank',
-        'name': 'Nama',
-        'symbol': 'Simbol',
-        'price': 'Harga (USD)',
-        'market_cap': 'Kapitalisasi Pasar (USD)',
+        'name': 'Name',
+        'symbol': 'Symbol',
+        'price': 'Price (USD)',
+        'market_cap': 'Market Cap (USD)',
         'volume_24h': 'Volume 24h (USD)',
-        'percent_change_24h': 'Perubahan 24h (%)',
-        'last_updated': 'Terakhir Diperbarui'
-    }), use_container_width=True)
+        'percent_change_24h': 'Change 24h (%)',
+        'last_updated': 'Last Updated'
+    }), use_container_width=True, hide_index=True)
