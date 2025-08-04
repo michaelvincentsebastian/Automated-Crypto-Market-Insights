@@ -47,13 +47,16 @@ jobs:
           CMC_PRO_API_KEY: ${{ secrets.CMC_PRO_API_KEY }}
 
       # Langkah 5: Secara otomatis melakukan commit dan push perubahan.
-      # Action ini akan secara otomatis mendeteksi perubahan pada file dan melakukan commit.
+      # Action ini akan secara otomatis mendeteksi perubahan pada file dan membuat commit.
       # Kita tidak perlu lagi langkah 'git add' manual.
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Automated update of top 100 crypto data"
+          # Pesan commit yang lengkap, termasuk '[skip ci]'.
+          # Ini adalah parameter khusus untuk pesan.
+          commit_message: "Automated update of top 100 crypto data [skip ci]"
           # Menentukan file yang akan di-commit.
           file_pattern: 'cleaning/updated_file.csv'
-          # '[skip ci]' mencegah workflow ini memicu dirinya sendiri secara tak terbatas.
-          commit_options: '--no-verify --signoff --message "Automated update of top 100 crypto data [skip ci]"'
+          # Memindahkan opsi tambahan ke sini agar tidak bentrok dengan pesan commit.
+          # '--no-verify' dan '--signoff' adalah contoh opsi yang bisa Anda tambahkan.
+          commit_options: '--no-verify --signoff'
