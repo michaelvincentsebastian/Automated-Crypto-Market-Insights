@@ -13,10 +13,12 @@ def load_csv_data():
     Loads data from the cleaned_data.csv file located in the cleaning/ directory.
     Retrieves the latest data for each coin (symbol) based on 'last_updated_utc+0'.
     """
-    file_path = 'B:\GitHub Repository\Automated-Crypto-Market-Insights\cleaning\cleaned_data.csv'
+    # Gunakan path relatif agar bisa diakses saat di-deploy
+    # Pastikan file 'cleaned_data.csv' ada di folder 'cleaning' di repository GitHub Anda
+    file_path = './cleaning/cleaned_data.csv'
     if not os.path.exists(file_path):
-        st.error(f"File '{file_path}' not found. Ensure you have uploaded it to the repository and it is in the correct location.")
-        st.warning("Check if you have a 'cleaning' folder and the 'cleaned_data.csv' file inside it, in the same directory as this Streamlit script.")
+        st.error(f"File '{file_path}' tidak ditemukan. Pastikan Anda telah mengunggahnya ke repository dan berada di lokasi yang benar.")
+        st.warning("Pastikan Anda memiliki folder 'cleaning' dan file 'cleaned_data.csv' di dalamnya, di dalam repository GitHub yang sama dengan script Streamlit ini.")
         return pd.DataFrame()
         
     try:
@@ -33,12 +35,12 @@ def load_csv_data():
             df['last_updated'] = pd.to_datetime(df['last_updated'])
             df = df.sort_values('last_updated').drop_duplicates(subset=['symbol'], keep='last')
         else:
-            st.error("No date column to filter the latest data. Ensure the 'last_updated_utc+0' or 'last_updated' column exists.")
+            st.error("Tidak ada kolom tanggal untuk memfilter data terbaru. Pastikan kolom 'last_updated_utc+0' atau 'last_updated' ada.")
             return pd.DataFrame()
         
         return df
     except Exception as e:
-        st.error(f"An error occurred while loading or processing the data: {e}")
+        st.error(f"Terjadi kesalahan saat memuat atau memproses data: {e}")
         return pd.DataFrame()
 
 
@@ -51,7 +53,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     # Fix: Using a public URL for the favicon, not a local file path.
-    page_icon="B:\GitHub Repository\Automated-Crypto-Market-Insights\img-resources\icon website.png"
+    page_icon="./img-resources/icon website.png"
 )
 
 # Inject custom CSS for styling
@@ -97,6 +99,14 @@ h1, h2, h3 {
     margin-right: 15px;
     font-size: 36px; /* Increased icon size */
     text-decoration: none; /* Removed the underline */
+}
+/* New CSS class for the Key Coin Analysis cards */
+.key-coin-card {
+    background-color: #162447;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    height: 100%;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -157,7 +167,7 @@ else:
 
 if not df.empty:
     last_updated_time = df['last_updated'].max() if 'last_updated' in df.columns else "Last update not available"
-    st.markdown(f"**Last Update:** {last_updated_time}")
+    st.markdown(f"**Last_Update:** {last_updated_time}")
 
 # --- Dashboard Overview Section ---
 st.markdown("---")
@@ -185,41 +195,46 @@ if not df.empty:
     col1, col2 = st.columns(2)
     
     with col1:
-        # Using st.container as a blue box with border=True for a separated look
-        with st.container(border=True): 
-            st.markdown("<h4>Top 5 Daily Gainers <i class='fas fa-arrow-trend-up' style='color:#28a745;'></i></h4>", unsafe_allow_html=True)
-            # Change st.container here for a lighter color (background-color: #2c3e50)
-            with st.container():
-                top_gainers = df.sort_values(by='percent_change_24h', ascending=False).head(5)
-                for _, row in top_gainers.iterrows():
-                    st.markdown(f"<p>{row['name']} ({row['symbol']}): <span style='color: #28a745;'>{row['percent_change_24h']:.2f}%</span></p>", unsafe_allow_html=True)
+        # Replaced st.container(border=True) with a new markdown div to apply the custom class
+        st.markdown('<div class="key-coin-card">', unsafe_allow_html=True)
+        st.markdown("<h4>Top 5 Daily Gainers <i class='fas fa-arrow-trend-up' style='color:#28a745;'></i></h4>", unsafe_allow_html=True)
+        # Change st.container here for a lighter color (background-color: #2c3e50)
+        with st.container():
+            top_gainers = df.sort_values(by='percent_change_24h', ascending=False).head(5)
+            for _, row in top_gainers.iterrows():
+                st.markdown(f"<p>{row['name']} ({row['symbol']}): <span style='color: #28a745;'>{row['percent_change_24h']:.2f}%</span></p>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
-        # Using st.container as a blue box with border=True
-        with st.container(border=True):
-            st.markdown("<h4>Top 5 Daily Losers <i class='fas fa-arrow-trend-down' style='color:#dc3545;'></i></h4>", unsafe_allow_html=True)
-            # Change st.container here for a lighter color (background-color: #2c3e50)
-            with st.container():
-                top_losers = df.sort_values(by='percent_change_24h', ascending=True).head(5)
-                for _, row in top_losers.iterrows():
-                    st.markdown(f"<p>{row['name']} ({row['symbol']}): <span style='color: #dc3545;'>{row['percent_change_24h']:.2f}%</span></p>", unsafe_allow_html=True)
+        # Replaced st.container(border=True) with a new markdown div to apply the custom class
+        st.markdown('<div class="key-coin-card">', unsafe_allow_html=True)
+        st.markdown("<h4>Top 5 Daily Losers <i class='fas fa-arrow-trend-down' style='color:#dc3545;'></i></h4>", unsafe_allow_html=True)
+        # Change st.container here for a lighter color (background-color: #2c3e50)
+        with st.container():
+            top_losers = df.sort_values(by='percent_change_24h', ascending=True).head(5)
+            for _, row in top_losers.iterrows():
+                st.markdown(f"<p>{row['name']} ({row['symbol']}): <span style='color: #dc3545;'>{row['percent_change_24h']:.2f}%</span></p>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
+    st.markdown("---")
     col3, col4 = st.columns(2)
     with col3:
-        with st.container(border=True):
-            st.markdown("<h4>Top 5 Trading Volume</h4>", unsafe_allow_html=True)
-            with st.container():
-                top_volume = df.sort_values(by='volume_24h', ascending=False).head(5)
-                for _, row in top_volume.iterrows():
-                    st.markdown(f"<p>{row['name']} ({row['symbol']}): ${row['volume_24h']:.2f}</p>", unsafe_allow_html=True)
+        st.markdown('<div class="key-coin-card">', unsafe_allow_html=True)
+        st.markdown("<h4>Top 5 Trading Volume</h4>", unsafe_allow_html=True)
+        with st.container():
+            top_volume = df.sort_values(by='volume_24h', ascending=False).head(5)
+            for _, row in top_volume.iterrows():
+                st.markdown(f"<p>{row['name']} ({row['symbol']}): ${row['volume_24h']:.2f}</p>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
     with col4:
-        with st.container(border=True):
-            st.markdown("<h4>Top 5 Biggest Market Cap</h4>", unsafe_allow_html=True)
-            with st.container():
-                top_market_cap_list = df.sort_values(by='market_cap', ascending=False).head(5)
-                for _, row in top_market_cap_list.iterrows():
-                    st.markdown(f"<p>{row['name']} ({row['symbol']}): ${row['market_cap']:.2f}</p>", unsafe_allow_html=True)
+        st.markdown('<div class="key-coin-card">', unsafe_allow_html=True)
+        st.markdown("<h4>Top 5 Biggest Market Cap</h4>", unsafe_allow_html=True)
+        with st.container():
+            top_market_cap_list = df.sort_values(by='market_cap', ascending=False).head(5)
+            for _, row in top_market_cap_list.iterrows():
+                st.markdown(f"<p>{row['name']} ({row['symbol']}): ${row['market_cap']:.2f}</p>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Data Visualization Section ---
 st.markdown("---")
