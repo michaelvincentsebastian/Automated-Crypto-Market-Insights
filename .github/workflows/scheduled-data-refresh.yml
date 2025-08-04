@@ -1,57 +1,59 @@
+# Nama workflow ini akan muncul di tab "Actions" di repositori Anda
 name: Update Crypto Data
 
-# Menjalankan workflow secara otomatis setiap 6 menit
-# dan juga bisa dijalankan secara manual dari tab Actions
+# Workflow akan dijalankan secara otomatis setiap 6 menit sesuai jadwal cron,
+# dan juga bisa dijalankan secara manual dari tab Actions.
 on:
   schedule:
-    # Menggunakan cron untuk menjadwalkan run setiap 6 menit
+    # Jadwal run setiap 6 menit.
     - cron: '*/6 * * * *'
   workflow_dispatch:
 
-# Tambahkan blok permissions ini untuk memberikan izin tulis
+# Blok permissions ini sangat penting untuk memberikan izin 'write'
+# agar workflow bisa melakukan commit dan push ke repositori.
 permissions:
   contents: write
 
 jobs:
   update-data:
+    # Menjalankan job di mesin virtual Ubuntu terbaru.
     runs-on: ubuntu-latest
 
     steps:
+      # Langkah 1: Checkout repositori.
+      # Menggunakan versi terbaru (@v4) yang lebih stabil.
       - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-          # Token ini sekarang akan memiliki izin yang cukup karena blok di atas
-          token: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/checkout@v4
 
+      # Langkah 2: Menyiapkan lingkungan Python.
+      # Menggunakan versi terbaru (@v5) yang direkomendasikan.
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
+      # Langkah 3: Menginstal dependensi yang dibutuhkan (pandas dan requests).
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests pandas
 
+      # Langkah 4: Menjalankan skrip Python untuk mengambil dan memperbarui data.
+      # Skrip ini diharapkan membuat atau memperbarui file 'cleaning/updated_file.csv'.
       - name: Run data fetching script
-        # Jalankan skrip Python yang sudah direvisi
         run: python cleaning/data_cleaner_and_puller.py
         env:
-          # Pastikan Anda telah menambahkan secret ini di Settings > Secrets
+          # Mengakses secret API key yang sudah Anda simpan di GitHub.
           CMC_PRO_API_KEY: ${{ secrets.CMC_PRO_API_KEY }}
 
-      - name: Verify file creation
-        # Langkah opsional untuk memastikan file berhasil dibuat
-        run: ls -l cleaning/updated_file.csv
-
-      - name: Add new file to git staging area
-        # Langkah ini secara eksplisit memberitahu git untuk melacak file yang baru dibuat
-        run: git add cleaning/updated_file.csv
-
+      # Langkah 5: Secara otomatis melakukan commit dan push perubahan.
+      # Action ini akan secara otomatis mendeteksi perubahan pada file dan melakukan commit.
+      # Kita tidak perlu lagi langkah 'git add' manual.
       - name: Commit and push changes
-        # Action ini akan secara otomatis mendeteksi perubahan file dan membuat commit
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Automated update of top 100 crypto data"
-          # Tidak perlu lagi menentukan file_pattern karena file sudah ditambahkan secara manual
-          # file_pattern: 'cleaning/updated_file.csv'
+          # Menentukan file yang akan di-commit.
+          file_pattern: 'cleaning/updated_file.csv'
+          # '[skip ci]' mencegah workflow ini memicu dirinya sendiri secara tak terbatas.
+          commit_options: '--no-verify --signoff --message "Automated update of top 100 crypto data [skip ci]"'
