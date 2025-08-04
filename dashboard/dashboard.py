@@ -7,18 +7,18 @@ import os
 # --- FUNCTION TO LOAD DATA FROM LOCAL/GITHUB FILE ---
 # =======================================================================
 # st.cache_data will cache data for 6 minutes to avoid repeated loading
+# This duration matches our GitHub Actions workflow schedule.
 @st.cache_data(ttl=360)
 def load_csv_data():
     """
-    Loads data from the cleaned_data.csv file located in the cleaning/ directory.
+    Loads data from the updated_file.csv file.
     Retrieves the latest data for each coin (symbol) based on 'last_updated_utc+0'.
     """
-    # Gunakan path relatif agar bisa diakses saat di-deploy
-    # Pastikan file 'cleaned_data.csv' ada di folder 'cleaning' di repository GitHub Anda
-    file_path = './cleaning/cleaned_data.csv'
+    # --- UPDATE: Ganti path file ke 'updated_file.csv' di root repository ---
+    file_path = './updated_file.csv'
+    
     if not os.path.exists(file_path):
-        st.error(f"File '{file_path}' tidak ditemukan. Pastikan Anda telah mengunggahnya ke repository dan berada di lokasi yang benar.")
-        st.warning("Pastikan Anda memiliki folder 'cleaning' dan file 'cleaned_data.csv' di dalamnya, di dalam repository GitHub yang sama dengan script Streamlit ini.")
+        st.error(f"File '{file_path}' tidak ditemukan. Pastikan Anda telah mengunggahnya ke root repository GitHub Anda.")
         return pd.DataFrame()
         
     try:
@@ -47,13 +47,12 @@ def load_csv_data():
 # =======================================================================
 # --- STREAMLIT DASHBOARD CONFIGURATION ---
 # =======================================================================
-# Favicon placeholder. Replace this URL with your logo URL.
+# --- UPDATE: Menggunakan emoji sebagai favicon karena lebih stabil saat deployment ---
 st.set_page_config(
     page_title="Crypto Coin Market Cap Analytics Dashboard",
     layout="wide",
     initial_sidebar_state="expanded",
-    # Fix: Using a public URL for the favicon, not a local file path.
-    page_icon="./img-resources/icon website.png"
+    page_icon="📈"
 )
 
 # Inject custom CSS for styling
@@ -172,7 +171,8 @@ if not df.empty:
 # --- Dashboard Overview Section ---
 st.markdown("---")
 st.subheader("Overview Dashboard")
-st.info("Note: This data is pulled from an API to a local database. Data can only be updated when the author turns on the device and the automated script runs.")
+# --- UPDATE: Mengubah pesan informasi untuk mencerminkan otomatisasi GitHub Actions ---
+st.info("Catatan: Dashboard ini diperbarui secara otomatis setiap 6 menit oleh GitHub Actions workflow. Data yang ditampilkan akan selalu yang terbaru!")
 
 # --- Aggregate Data Section ---
 st.markdown("---")
@@ -273,3 +273,4 @@ if not df.empty:
         'percent_change_24h': 'Change 24h (%)',
         'last_updated': 'Last Updated'
     }), use_container_width=True, hide_index=True)
+
