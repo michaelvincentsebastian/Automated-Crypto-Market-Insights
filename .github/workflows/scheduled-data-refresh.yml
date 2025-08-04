@@ -1,13 +1,12 @@
 name: Update Crypto Data
 
 # Menjalankan workflow secara otomatis setiap 6 menit
+# dan juga bisa dijalankan secara manual dari tab Actions
 on:
   schedule:
     # Menggunakan cron untuk menjadwalkan run setiap 6 menit
     - cron: '*/6 * * * *'
-  # Anda juga bisa menambahkan pemicu manual lagi jika dibutuhkan,
-  # namun saat ini di-disable agar workflow benar-benar otomatis
-  # workflow_dispatch:
+  workflow_dispatch:
 
 # Tambahkan blok permissions ini untuk memberikan izin tulis
 permissions:
