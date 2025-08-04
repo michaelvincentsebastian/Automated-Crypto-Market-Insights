@@ -10,11 +10,15 @@ on:
   # schedule:
   #   - cron: '0 * * * *'
 
-# Ini adalah blok yang harus Anda tambahkan atau perbarui
+# ======================================================
+# INI ADALAH BAGIAN YANG HARUS DITAMBAHKAN ATAU DIPERBARUI
+# ======================================================
 permissions:
   contents: write # Ini memberikan izin tulis ke bot untuk file repositori
 
-# Definisikan jobs yang akan dijalankan
+# ======================================================
+# BAGIAN DI BAWAH INI ADALAH JOB DAN STEPS YANG SUDAH ADA
+# ======================================================
 jobs:
   update-data:
     runs-on: ubuntu-latest
