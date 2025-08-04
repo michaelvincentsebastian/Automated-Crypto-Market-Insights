@@ -42,16 +42,33 @@ def clean_and_format_data(raw_data):
 
     df = pd.json_normalize(raw_data['data'])
 
-    # Asumsi dari screenshot, kolom-kolom sudah ada di tingkat atas
-    # Normalisasi data untuk mendapatkan kolom yang dibutuhkan
-    df_cleaned = df[['id', 'name', 'symbol', 'slug', 'cmc_rank', 'quote.USD.price', 'quote.USD.volume_24h', 'quote.USD.market_cap', 'quote.USD.percent_change_1h', 'quote.USD.percent_change_24h', 'quote.USD.percent_change_7d', 'quote.USD.last_updated', 'quote.USD.timestamp']].copy()
+    # Mengambil timestamp untuk seluruh permintaan API
+    pull_timestamp = raw_data['status']['timestamp']
 
-    # Mengubah nama kolom agar lebih sederhana
-    df_cleaned.columns = ['id', 'name', 'symbol', 'slug', 'cmc_rank', 'price', 'volume_24h', 'market_cap', 'percent_change_1h', 'percent_change_24h', 'percent_change_7d', 'last_updated', 'timestamp']
+    # Normalisasi data dan memilih kolom yang dibutuhkan
+    # Kolom 'quote.USD.timestamp' tidak ada, yang ada adalah 'quote.USD.last_updated'
+    df_cleaned = df[[
+        'id', 'name', 'symbol', 'slug', 'cmc_rank', 
+        'quote.USD.price', 'quote.USD.volume_24h', 
+        'quote.USD.market_cap', 'quote.USD.percent_change_1h', 
+        'quote.USD.percent_change_24h', 'quote.USD.percent_change_7d', 
+        'quote.USD.last_updated'
+    ]].copy()
+
+    # Mengubah nama kolom agar lebih sederhana dan konsisten
+    df_cleaned.columns = [
+        'id', 'name', 'symbol', 'slug', 'cmc_rank', 
+        'price', 'volume_24h', 'market_cap', 
+        'percent_change_1h', 'percent_change_24h', 
+        'percent_change_7d', 'last_updated'
+    ]
     
+    # Menambahkan kolom baru untuk timestamp saat data ditarik
+    df_cleaned['pull_timestamp'] = pull_timestamp
+
     # Mengonversi kolom tanggal dan waktu
     df_cleaned['last_updated'] = pd.to_datetime(df_cleaned['last_updated'])
-    df_cleaned['timestamp'] = pd.to_datetime(df_cleaned['timestamp'])
+    df_cleaned['pull_timestamp'] = pd.to_datetime(df_cleaned['pull_timestamp'])
 
     return df_cleaned
 
@@ -79,4 +96,3 @@ if __name__ == "__main__":
             print("Gagal membersihkan data.")
     else:
         print("Gagal mengambil data dari API.")
-
