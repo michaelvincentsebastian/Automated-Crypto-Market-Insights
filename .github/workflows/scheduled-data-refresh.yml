@@ -1,53 +1,45 @@
-# Nama workflow Anda
-name: Automated Data Update
+name: Update Crypto Data
 
-# Memicu workflow pada push ke branch utama
+# Menjalankan workflow saat ada push ke branch 'main'
+# atau secara manual dari tab Actions
 on:
   push:
     branches:
       - main
-  # Juga bisa dijadwalkan
-  # schedule:
-  #   - cron: '0 * * * *'
-  workflow_dispatch: # Mengizinkan eksekusi manual
+  workflow_dispatch:
 
-# ======================================================
-# INI ADALAH BAGIAN YANG HARUS DITAMBAHKAN ATAU DIPERBARUI
-# ======================================================
-permissions:
-  contents: write # Ini memberikan izin tulis ke bot untuk file repositori
-
-# ======================================================
-# BAGIAN DI BAWAH INI ADALAH JOB DAN STEPS YANG SUDAH ADA
-# ======================================================
 jobs:
   update-data:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4 # Diperbarui ke versi 4
+        uses: actions/checkout@v2
+        with:
+          # Penting: Menggunakan token untuk mengizinkan commit kembali ke repo
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.10'
+          python-version: '3.x'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas requests
+          pip install requests pandas
 
-      - name: Run python cleaning script
+      - name: Run data fetching script
+        # Anda harus memastikan path ini benar ke skrip Python Anda
+        # (Misalnya, jika file ada di folder 'cleaning', path-nya adalah 'cleaning/data_cleaner_and_puller.py')
+        run: python cleaning/data_cleaner_and_puller.py
         env:
+          # Pastikan Anda telah menambahkan secret ini di Settings > Secrets
           CMC_PRO_API_KEY: ${{ secrets.CMC_PRO_API_KEY }}
-        run: |
-          python cleaning/data_cleaner_and_puller.py
 
       - name: Commit and push changes
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add cleaning/cleaned_data.csv
-          git commit -m "Automated data update" || echo "No changes to commit"
-          # Perintah push yang lebih eksplisit
-          git push
+        # Action ini akan secara otomatis mendeteksi perubahan file dan membuat commit
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Automated data update"
+          file_pattern: 'cleaning/cleaned_data.csv'
