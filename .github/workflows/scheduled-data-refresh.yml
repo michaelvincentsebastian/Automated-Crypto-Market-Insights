@@ -1,73 +1,47 @@
-# Nama workflow ini, akan muncul di tab "Actions" di GitHub Anda
-name: Scheduled Data Refresh
+# Nama workflow Anda
+name: Automated Data Update
 
-# Tentukan kapan workflow ini akan berjalan
-# "on: push" akan berjalan setiap kali ada push ke branch 'main'
-# "on: workflow_dispatch" memungkinkan Anda menjalankan secara manual dari tab "Actions"
-# "on: schedule" akan berjalan sesuai jadwal (di sini, setiap 6 menit)
+# Memicu workflow pada push ke branch utama
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
-  schedule:
-    # Jadwal ini berjalan setiap 6 menit.
-    # Formatnya adalah cron syntax:
-    # * * * * *
-    # | | | | |
-    # | | | | +----- Hari dalam seminggu (0-6) (Minggu-Sabtu)
-    # | | | +------- Bulan (1-12)
-    # | | +--------- Hari dalam sebulan (1-31)
-    # | +----------- Jam (0-23)
-    # +------------- Menit (0-59)
-    # '*/6 * * * *' berarti "setiap 6 menit".
-    - cron: '*/6 * * * *'
+    branches:
+      - main
+  # Juga bisa dijadwalkan
+  # schedule:
+  #   - cron: '0 * * * *'
 
-# Definisi job yang akan dijalankan
+# Ini adalah blok yang harus Anda tambahkan atau perbarui
+permissions:
+  contents: write # Ini memberikan izin tulis ke bot untuk file repositori
+
+# Definisikan jobs yang akan dijalankan
 jobs:
-  build-and-run:
-    # Tentukan OS yang akan digunakan untuk menjalankan job
+  update-data:
     runs-on: ubuntu-latest
-
-    # Langkah-langkah yang akan dijalankan oleh job
     steps:
-      # Langkah 1: Checkout repository Anda
-      # Ini akan mengunduh semua file dari repository ke server GitHub Actions
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      # Langkah 2: Siapkan lingkungan Python
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.10' # Pastikan versi Python sesuai dengan yang Anda gunakan
+          python-version: '3.10'
 
-      # Langkah 3: Install library yang diperlukan
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Install dependencies from requirements.txt for better maintainability
-          pip install -r requirements.txt
+          pip install pandas requests
 
-      # Langkah 4: Jalankan skrip gabungan data_cleaner_and_puller.py
-      # Skrip ini sekarang bertanggung jawab untuk mengambil data dari API, membersihkan, dan menyimpannya.
-      # Pastikan skrip ini berada di folder 'cleaning'
-      - name: Run data pulling and cleaning script
-        run: python cleaning/data_cleaner_and_puller.py
+      - name: Run python cleaning script
         env:
-          # Memberikan API key sebagai environment variable ke skrip Python
           CMC_PRO_API_KEY: ${{ secrets.CMC_PRO_API_KEY }}
-
-      # Langkah 5: Konfigurasi Git untuk commit otomatis
-      # Ini diperlukan agar GitHub Actions bisa melakukan commit dan push
-      - name: Configure Git
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          python cleaning/data_cleaner_and_puller.py
 
-      # Langkah 6: Commit dan push file yang diperbarui
-      # Perintah ini akan memeriksa apakah ada perubahan, lalu melakukan commit dan push
       - name: Commit and push changes
         run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add cleaning/cleaned_data.csv
-          git commit -m "Automated data refresh" || echo "No changes to commit"
+          git commit -m "Automated data update" || echo "No changes to commit"
           git push
