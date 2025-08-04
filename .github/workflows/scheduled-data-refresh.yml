@@ -40,10 +40,18 @@ jobs:
           # Pastikan Anda telah menambahkan secret ini di Settings > Secrets
           CMC_PRO_API_KEY: ${{ secrets.CMC_PRO_API_KEY }}
 
+      - name: Verify file creation
+        # Langkah opsional untuk memastikan file berhasil dibuat
+        run: ls -l cleaning/updated_file.csv
+
+      - name: Add new file to git staging area
+        # Langkah ini secara eksplisit memberitahu git untuk melacak file yang baru dibuat
+        run: git add cleaning/updated_file.csv
+
       - name: Commit and push changes
         # Action ini akan secara otomatis mendeteksi perubahan file dan membuat commit
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Automated update of top 100 crypto data"
-          # Hanya commit file updated_file.csv
-          file_pattern: 'cleaning/updated_file.csv'
+          # Tidak perlu lagi menentukan file_pattern karena file sudah ditambahkan secara manual
+          # file_pattern: 'cleaning/updated_file.csv'
