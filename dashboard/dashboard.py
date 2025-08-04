@@ -15,7 +15,7 @@ def load_csv_data():
     Retrieves the latest data for each coin (symbol) based on 'last_updated_utc+0'.
     """
     # --- UPDATE: Ganti path file ke 'updated_file.csv' di root repository ---
-    file_path = './updated_file.csv'
+    file_path = 'cleaning/updated_file.csv'
     
     if not os.path.exists(file_path):
         st.error(f"File '{file_path}' tidak ditemukan. Pastikan Anda telah mengunggahnya ke root repository GitHub Anda.")
@@ -52,7 +52,7 @@ st.set_page_config(
     page_title="Crypto Coin Market Cap Analytics Dashboard",
     layout="wide",
     initial_sidebar_state="expanded",
-    page_icon="📈"
+    page_icon="img-resources\icon website.png"
 )
 
 # Inject custom CSS for styling
