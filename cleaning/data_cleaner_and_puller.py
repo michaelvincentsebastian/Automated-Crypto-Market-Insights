@@ -5,12 +5,12 @@ import os
 from datetime import datetime
 
 # Fungsi untuk mengambil data dari API CoinMarketCap
-def fetch_data():
+def fetch_data(limit=100):
     """Mengambil data cryptocurrency dari API CoinMarketCap."""
     url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
     parameters = {
         'start': '1',
-        'limit': '100',
+        'limit': str(limit),  # Menggunakan parameter limit
         'convert': 'USD'
     }
     headers = {
@@ -35,7 +35,6 @@ def fetch_data():
 def clean_and_format_data(raw_data):
     """
     Membersihkan dan memformat data JSON mentah menjadi DataFrame.
-    Fungsi ini disesuaikan dengan struktur data yang tidak bertingkat.
     """
     if not raw_data or 'data' not in raw_data:
         print("Error: 'data' key not found in raw_data.")
@@ -65,53 +64,30 @@ def clean_and_format_data(raw_data):
 
     return df_cleaned
 
-# Fungsi untuk menyimpan data dengan aman (mode append)
-def save_data(df, file_path='cleaning/cleaned_data.csv'):
+# Fungsi untuk menyimpan data, mode overwrite
+def save_updated_data(df, file_path='cleaning/updated_file.csv'):
     """
-    Menyimpan DataFrame ke file CSV dengan menambahkan data baru.
-    Jika file sudah ada, data baru akan digabungkan, dan duplikat akan dihapus
-    berdasarkan id dan timestamp terbaru.
+    Menyimpan DataFrame ke file CSV dengan menimpa (overwrite) file yang sudah ada.
     """
-    print(f"Memeriksa apakah file {file_path} sudah ada.")
-    
-    if os.path.exists(file_path):
-        # Jika file ada, baca data lama
-        print("File sudah ada. Membaca data lama untuk digabungkan.")
-        try:
-            old_df = pd.read_csv(file_path)
-            # Mengonversi kolom datetime yang mungkin disimpan sebagai string
-            old_df['pull_timestamp'] = pd.to_datetime(old_df['pull_timestamp'])
-            
-            # Gabungkan DataFrame lama dan baru
-            combined_df = pd.concat([old_df, df], ignore_index=True)
-
-            # Hapus duplikat, hanya menyimpan baris dengan 'pull_timestamp' terbaru
-            # Ini penting untuk memastikan tidak ada duplikat data lama
-            combined_df.sort_values('pull_timestamp', ascending=False, inplace=True)
-            combined_df.drop_duplicates(subset=['id', 'pull_timestamp'], keep='first', inplace=True)
-            
-            # Simpan kembali seluruh DataFrame ke CSV (menimpa file yang lama)
-            combined_df.to_csv(file_path, index=False)
-            print(f"Data baru berhasil ditambahkan dan disimpan ke {file_path}")
-        except Exception as e:
-            print(f"Gagal membaca atau memproses data lama: {e}. Menimpa dengan data baru.")
-            df.to_csv(file_path, index=False)
-    else:
-        # Jika file belum ada, simpan data baru
-        print("File tidak ditemukan. Membuat file baru.")
+    try:
         df.to_csv(file_path, index=False)
-        print(f"Data berhasil disimpan ke {file_path}")
+        print(f"Data 100 koin teratas berhasil disimpan ke {file_path}")
+    except Exception as e:
+        print(f"Gagal menyimpan data ke CSV: {e}")
 
 if __name__ == "__main__":
-    print("Memulai proses pengambilan dan pembersihan data...")
-    raw_data = fetch_data()
-
+    print("Memulai proses pengambilan dan pembersihan data updated_file...")
+    
+    # Ambil 100 koin teratas saja
+    raw_data = fetch_data(limit=100)
+    
     if raw_data:
         print(f"Data berhasil didapat dari API. Jumlah koin: {len(raw_data['data'])}")
         cleaned_df = clean_and_format_data(raw_data)
-
+        
         if not cleaned_df.empty:
-            save_data(cleaned_df)
+            # Simpan data ke updated_file.csv (akan menimpa file yang lama)
+            save_updated_data(cleaned_df)
             print("Proses selesai.")
         else:
             print("Gagal membersihkan data.")

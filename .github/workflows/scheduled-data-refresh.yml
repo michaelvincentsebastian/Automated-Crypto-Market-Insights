@@ -1,12 +1,13 @@
 name: Update Crypto Data
 
-# Menjalankan workflow saat ada push ke branch 'main'
-# atau secara manual dari tab Actions
+# Menjalankan workflow secara otomatis setiap 6 menit
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  schedule:
+    # Menggunakan cron untuk menjadwalkan run setiap 6 menit
+    - cron: '*/6 * * * *'
+  # Anda juga bisa menambahkan pemicu manual lagi jika dibutuhkan,
+  # namun saat ini di-disable agar workflow benar-benar otomatis
+  # workflow_dispatch:
 
 # Tambahkan blok permissions ini untuk memberikan izin tulis
 permissions:
@@ -34,7 +35,7 @@ jobs:
           pip install requests pandas
 
       - name: Run data fetching script
-        # Anda harus memastikan path ini benar ke skrip Python Anda
+        # Jalankan skrip Python yang sudah direvisi
         run: python cleaning/data_cleaner_and_puller.py
         env:
           # Pastikan Anda telah menambahkan secret ini di Settings > Secrets
@@ -44,5 +45,6 @@ jobs:
         # Action ini akan secara otomatis mendeteksi perubahan file dan membuat commit
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Automated data update"
-          file_pattern: 'cleaning/cleaned_data.csv'
+          commit_message: "Automated update of top 100 crypto data"
+          # Hanya commit file updated_file.csv
+          file_pattern: 'cleaning/updated_file.csv'
