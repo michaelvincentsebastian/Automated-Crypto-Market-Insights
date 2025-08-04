@@ -8,6 +8,10 @@ on:
       - main
   workflow_dispatch:
 
+# Tambahkan blok permissions ini untuk memberikan izin tulis
+permissions:
+  contents: write
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
@@ -16,7 +20,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          # Penting: Menggunakan token untuk mengizinkan commit kembali ke repo
+          # Token ini sekarang akan memiliki izin yang cukup karena blok di atas
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
@@ -31,7 +35,6 @@ jobs:
 
       - name: Run data fetching script
         # Anda harus memastikan path ini benar ke skrip Python Anda
-        # (Misalnya, jika file ada di folder 'cleaning', path-nya adalah 'cleaning/data_cleaner_and_puller.py')
         run: python cleaning/data_cleaner_and_puller.py
         env:
           # Pastikan Anda telah menambahkan secret ini di Settings > Secrets
