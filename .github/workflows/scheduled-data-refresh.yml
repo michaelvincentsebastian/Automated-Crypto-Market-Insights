@@ -9,6 +9,7 @@ on:
   # Juga bisa dijadwalkan
   # schedule:
   #   - cron: '0 * * * *'
+  workflow_dispatch: # Mengizinkan eksekusi manual
 
 # ======================================================
 # INI ADALAH BAGIAN YANG HARUS DITAMBAHKAN ATAU DIPERBARUI
@@ -24,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Diperbarui ke versi 4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -44,8 +45,9 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add cleaning/cleaned_data.csv
           git commit -m "Automated data update" || echo "No changes to commit"
+          # Perintah push yang lebih eksplisit
           git push
