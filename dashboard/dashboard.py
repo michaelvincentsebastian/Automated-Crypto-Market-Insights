@@ -48,7 +48,8 @@ st.set_page_config(
     page_title="Crypto Coin Market Cap Analytics Dashboard",
     layout="wide",
     initial_sidebar_state="expanded",
-    page_icon="img-resources/icon website.png"
+    page_icon="img-resources/icon website.png",
+    theme="dark" # Tambahan untuk memaksa mode gelap
 )
 
 # Inject custom CSS for styling, animations, and responsiveness
