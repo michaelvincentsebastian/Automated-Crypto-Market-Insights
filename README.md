@@ -1,11 +1,15 @@
 # cryptsight
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-crypsight.vercel.app-00FF88?style=for-the-badge&logo=vercel&logoColor=black)](https://crypsight.vercel.app/)
+
 [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Upstash Redis](https://img.shields.io/badge/Upstash-Redis-00E699?logo=redis&logoColor=white)](https://upstash.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-Serverless-000000?logo=vercel&logoColor=white)](https://vercel.com/)
+
+> 🌐 **Live Dashboard**: [https://crypsight.vercel.app/](https://crypsight.vercel.app/)
 
 A modern, high-performance cryptocurrency market intelligence dashboard built with a **zero-copy ingestion architecture**, integrated credit circuit breaker, educational tooltips for domain learners, and automated scheduler decoupled from Git history.
 
@@ -152,6 +156,7 @@ npm run build
 5. Klik **Deploy**.
    - Data akan di-cache ke Upstash Redis saat aplikasi pertama kali diakses, dan dapat diperbarui secara live kapan saja lewat tombol **"Sync Live CMC"** di header dashboard.
    - Tidak memerlukan cron job harian/berulang, 100% kompatibel dan aman dengan tier gratis **Vercel Hobby** tanpa batasan cron.
+   - Dashboard dapat langsung diakses secara live di: **[https://crypsight.vercel.app/](https://crypsight.vercel.app/)**
 
 ---
 
