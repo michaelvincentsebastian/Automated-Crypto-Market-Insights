@@ -32,7 +32,7 @@ export function StaleBanner({
           title="Menampilkan Data Cache"
           description={`Data terakhir diperbarui ${formatRelativeTime(
             lastRefreshedAt
-          )}. Penjadwalan fetch Vercel Cron berjalan setiap 10-30 menit untuk menghemat kuota credit.`}
+          )}. Anda dapat menekan tombol "Sync Live CMC" di header kapan saja untuk memperbarui data langsung dari CoinMarketCap.`}
         />
       </div>
     );

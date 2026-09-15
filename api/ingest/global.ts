@@ -3,12 +3,6 @@ import { redis } from "../_lib/redis";
 import { fetchCmcWithCircuitBreaker } from "../_lib/cmc";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
-  // Check authorization if CRON_SECRET is set
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && req.headers.authorization !== `Bearer ${cronSecret}`) {
-    return res.status(401).json({ error: "Unauthorized cron trigger" });
-  }
-
   try {
     const { data, creditCount, isMock } = await fetchCmcWithCircuitBreaker<any>(
       "/v1/global-metrics/quotes/latest",
@@ -29,8 +23,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       lastRefreshedAt: new Date().toISOString(),
     };
 
-    // TTL 35 minutes (2100 seconds)
-    await redis.set("market:global:latest", payload, { ex: 2100 });
+    // TTL 7 days (604800 seconds) until manual sync
+    await redis.set("market:global:latest", payload, { ex: 604800 });
 
     return res.status(200).json({
       success: true,

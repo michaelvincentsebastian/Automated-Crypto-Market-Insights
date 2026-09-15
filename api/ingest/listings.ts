@@ -3,11 +3,6 @@ import { redis } from "../_lib/redis";
 import { fetchCmcWithCircuitBreaker } from "../_lib/cmc";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && req.headers.authorization !== `Bearer ${cronSecret}`) {
-    return res.status(401).json({ error: "Unauthorized cron trigger" });
-  }
-
   try {
     const { data, creditCount, isMock } = await fetchCmcWithCircuitBreaker<any[]>(
       "/v1/cryptocurrency/listings/latest",
@@ -45,12 +40,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       };
     });
 
-    // 1. Cache Top 100 listings (TTL 15 min = 900 s)
+    // 1. Cache Top 100 listings (TTL 7 days = 604800 s until manual sync)
     const listingsPayload = {
       coins,
       lastRefreshedAt: nowIso,
     };
-    await redis.set("market:listings:top100", listingsPayload, { ex: 900 });
+    await redis.set("market:listings:top100", listingsPayload, { ex: 604800 });
 
     // 2. Compute Top 5 Gainers & Top 5 Losers (in-memory zero copy)
     const validMovers = coins.filter(c => !isNaN(c.quote.percentChange24h));
@@ -83,8 +78,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         })
       );
 
-    await redis.set("market:movers:gainers", { movers: sortedGainers, lastRefreshedAt: nowIso }, { ex: 900 });
-    await redis.set("market:movers:losers", { movers: sortedLosers, lastRefreshedAt: nowIso }, { ex: 900 });
+    await redis.set("market:movers:gainers", { movers: sortedGainers, lastRefreshedAt: nowIso }, { ex: 604800 });
+    await redis.set("market:movers:losers", { movers: sortedLosers, lastRefreshedAt: nowIso }, { ex: 604800 });
 
     // 3. Self-collected historical sparkline rolling window (top 20 coins to conserve storage)
     const topTrackedCoins = coins.slice(0, 20);

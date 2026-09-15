@@ -1,19 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [
-    {
-      "path": "/api/ingest/listings",
-      "schedule": "*/10 * * * *"
-    },
-    {
-      "path": "/api/ingest/global",
-      "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/ingest/feargreed",
-      "schedule": "*/30 * * * *"
-    }
-  ],
+
   "rewrites": [
     {
       "source": "/api/(.*)",

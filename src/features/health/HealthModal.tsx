@@ -112,7 +112,7 @@ export function HealthModal({ isOpen, onClose }: HealthModalProps) {
             {/* Ingestion Endpoints Health */}
             <div className="p-4 rounded-xl bg-[#080d0a] border border-[#1a2e22]">
               <span className="font-semibold text-white font-display block mb-3">
-                Cron Ingestion Endpoints
+                Ingestion & Sync Endpoints
               </span>
 
               <div className="space-y-2">
@@ -122,7 +122,7 @@ export function HealthModal({ isOpen, onClose }: HealthModalProps) {
                     <CheckCircle2 className="w-4 h-4 text-[#00ff88]" />
                     <div>
                       <span className="font-medium text-[#f1ffef] font-mono text-[11px]">/api/ingest/global</span>
-                      <span className="text-[10px] text-[#7e9c8b] block">Every 30 mins</span>
+                      <span className="text-[10px] text-[#7e9c8b] block">On-demand sync</span>
                     </div>
                   </div>
                   <span className="text-[11px] font-mono text-[#7e9c8b]">
@@ -136,7 +136,7 @@ export function HealthModal({ isOpen, onClose }: HealthModalProps) {
                     <CheckCircle2 className="w-4 h-4 text-[#00ff88]" />
                     <div>
                       <span className="font-medium text-[#f1ffef] font-mono text-[11px]">/api/ingest/listings</span>
-                      <span className="text-[10px] text-[#7e9c8b] block">Every 10 mins (Top 100)</span>
+                      <span className="text-[10px] text-[#7e9c8b] block">On-demand (Top 100)</span>
                     </div>
                   </div>
                   <span className="text-[11px] font-mono text-[#7e9c8b]">
@@ -150,7 +150,7 @@ export function HealthModal({ isOpen, onClose }: HealthModalProps) {
                     <CheckCircle2 className="w-4 h-4 text-[#00ff88]" />
                     <div>
                       <span className="font-medium text-[#f1ffef] font-mono text-[11px]">/api/ingest/feargreed</span>
-                      <span className="text-[10px] text-[#7e9c8b] block">Every 30 mins</span>
+                      <span className="text-[10px] text-[#7e9c8b] block">On-demand sync</span>
                     </div>
                   </div>
                   <span className="text-[11px] font-mono text-[#7e9c8b]">

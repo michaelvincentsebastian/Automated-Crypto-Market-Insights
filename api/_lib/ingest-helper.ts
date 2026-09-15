@@ -22,7 +22,8 @@ export async function ingestGlobalData() {
     lastRefreshedAt: new Date().toISOString(),
   };
 
-  await redis.set("market:global:latest", payload, { ex: 2100 });
+  // Persist cache for 7 days (604800s) until manual sync
+  await redis.set("market:global:latest", payload, { ex: 604800 });
   return payload;
 }
 
@@ -50,7 +51,8 @@ export async function ingestFearGreedData() {
     lastRefreshedAt: new Date().toISOString(),
   };
 
-  await redis.set("market:feargreed:latest", payload, { ex: 2100 });
+  // Persist cache for 7 days (604800s) until manual sync
+  await redis.set("market:feargreed:latest", payload, { ex: 604800 });
   return payload;
 }
 
@@ -94,7 +96,8 @@ export async function ingestListingsData() {
     coins,
     lastRefreshedAt: nowIso,
   };
-  await redis.set("market:listings:top100", listingsPayload, { ex: 900 });
+  // Persist cache for 7 days (604800s) until manual sync
+  await redis.set("market:listings:top100", listingsPayload, { ex: 604800 });
 
   // Gainers & Losers
   const validMovers = coins.filter(c => !isNaN(c.quote.percentChange24h));
@@ -124,8 +127,8 @@ export async function ingestListingsData() {
       })
     );
 
-  await redis.set("market:movers:gainers", { movers: sortedGainers, lastRefreshedAt: nowIso }, { ex: 900 });
-  await redis.set("market:movers:losers", { movers: sortedLosers, lastRefreshedAt: nowIso }, { ex: 900 });
+  await redis.set("market:movers:gainers", { movers: sortedGainers, lastRefreshedAt: nowIso }, { ex: 604800 });
+  await redis.set("market:movers:losers", { movers: sortedLosers, lastRefreshedAt: nowIso }, { ex: 604800 });
 
   // Sparkline history
   const topTrackedCoins = coins.slice(0, 20);

@@ -22,7 +22,7 @@ Versi pertama project ini (Python + Streamlit + GitHub Actions cron tiap 6 menit
 | Aspek | v1 (Legacy) | v2 (Zero-Copy) |
 |---|---|---|
 | **Alur Data** | API → CSV → SQLite → Streamlit (5 hop) | API → Redis Cache → Frontend (2 hop) |
-| **Scheduler** | GitHub Actions (auto-commit tiap 6 mnt) | Vercel Cron Jobs (di luar Git) |
+| **Ingestion & Sync** | GitHub Actions (auto-commit tiap 6 mnt) | On-Demand UI Sync & Auto-Cache (di luar Git) |
 | **Penyimpanan** | File CSV & SQLite di disk/repo git | Upstash Redis KV Store dengan TTL |
 | **Frontend** | Streamlit (Python server-rendered) | React + Vite + TypeScript (SPA) |
 | **UI & Desain** | Default Streamlit widgets | Custom shadcn/ui + Tailwind Dark Crypto theme |
@@ -54,7 +54,7 @@ Versi pertama project ini (Python + Streamlit + GitHub Actions cron tiap 6 menit
 - **State & Data Fetching**: TanStack Query (React Query v5)
 - **Backend / Serverless**: Vercel Serverless Functions (Node.js / TypeScript)
 - **Cache / Storage**: Upstash Redis (REST API)
-- **Scheduler**: Vercel Cron Jobs
+- **Data Sync**: On-Demand Live Sync via UI & Automatic Initial Ingestion (Vercel Hobby friendly)
 - **Hosting**: Vercel
 
 ---
@@ -72,10 +72,10 @@ Automated-Crypto-Market-Insights/
 │   │   ├── coin.ts                # GET /api/dashboard/coin?id=...
 │   │   ├── listings.ts            # GET /api/dashboard/listings (Top 100)
 │   │   └── overview.ts            # GET /api/dashboard/overview (Global, FGI, Movers)
-│   ├── ingest/                    # Endpoint cron ingest data CMC ke Redis
-│   │   ├── feargreed.ts           # Cron tiap 30 menit
-│   │   ├── global.ts              # Cron tiap 30 menit
-│   │   └── listings.ts            # Cron tiap 10 menit
+│   ├── ingest/                    # Endpoint ingest data CMC ke Redis (on-demand)
+│   │   ├── feargreed.ts           # Ingest Fear & Greed Index
+│   │   ├── global.ts              # Ingest Global Metrics
+│   │   └── listings.ts            # Ingest Top 100 Listings & Sparklines
 │   └── health.ts                  # GET /api/health (status credit & ingest)
 ├── src/                           # Frontend React SPA
 │   ├── components/
@@ -100,7 +100,7 @@ Automated-Crypto-Market-Insights/
 ├── package.json
 ├── tailwind.config.js
 ├── tsconfig.json
-├── vercel.json                    # Konfigurasi Vercel Cron & rewrites
+├── vercel.json                    # Konfigurasi Vercel rewrites
 └── vite.config.ts                 # Vite config + local API dev middleware
 ```
 
@@ -128,7 +128,6 @@ Isi variabel di `.env` (opsional untuk dev lokal; jika dikosongkan, aplikasi aka
 CMC_API_KEY=your_coinmarketcap_api_key
 UPSTASH_REDIS_REST_URL=https://your-database.upstash.io
 UPSTASH_REDIS_REST_TOKEN=your_upstash_token
-CRON_SECRET=your_optional_cron_secret
 ```
 
 ### 4. Menjalankan di Lingkungan Lokal (Local Development)
@@ -150,10 +149,9 @@ npm run build
 2. Import repository di dashboard [Vercel](https://vercel.com/).
 3. Hubungkan integrasi **Upstash Redis** melalui Vercel Marketplace (variabel `UPSTASH_REDIS_REST_URL` dan `UPSTASH_REDIS_REST_TOKEN` akan otomatis terkonfigurasi).
 4. Tambahkan `CMC_API_KEY` pada menu **Project Settings > Environment Variables** di Vercel.
-5. Klik **Deploy**. Penjadwalan cron akan otomatis aktif sesuai definisi di `vercel.json`:
-   - `/api/ingest/listings` berjalan setiap 10 menit
-   - `/api/ingest/global` berjalan setiap 30 menit
-   - `/api/ingest/feargreed` berjalan setiap 30 menit
+5. Klik **Deploy**.
+   - Data akan di-cache ke Upstash Redis saat aplikasi pertama kali diakses, dan dapat diperbarui secara live kapan saja lewat tombol **"Sync Live CMC"** di header dashboard.
+   - Tidak memerlukan cron job harian/berulang, 100% kompatibel dan aman dengan tier gratis **Vercel Hobby** tanpa batasan cron.
 
 ---
 
