@@ -12,11 +12,12 @@ node_modules/
 .pnp
 .pnp.js
 
-# Production Build
+# Production Build & Cache
 dist/
 dist-ssr/
 build/
 .vercel
+.vite/
 
 # Cache & Logs
 npm-debug.log*
