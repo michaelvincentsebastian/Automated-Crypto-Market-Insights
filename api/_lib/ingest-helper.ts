@@ -1,6 +1,6 @@
-import { redis } from "./redis";
-import { fetchCmcWithCircuitBreaker } from "./cmc";
-import type { GlobalMarketData, FearGreedData, CoinItem, MarketMoverCoin } from "./types";
+import { redis } from "./redis.js";
+import { fetchCmcWithCircuitBreaker } from "./cmc.js";
+import type { GlobalMarketData, FearGreedData, CoinItem, MarketMoverCoin } from "./types.js";
 
 export async function ingestGlobalData() {
   const { data } = await fetchCmcWithCircuitBreaker<any>(

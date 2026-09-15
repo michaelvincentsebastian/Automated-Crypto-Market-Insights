@@ -1,6 +1,6 @@
-import type { ApiRequest, ApiResponse, HealthStatusResponse } from "./_lib/types";
-import { redis } from "./_lib/redis";
-import { getCreditsStatus } from "./_lib/cmc";
+import type { ApiRequest, ApiResponse, HealthStatusResponse } from "./_lib/types.js";
+import { redis } from "./_lib/redis.js";
+import { getCreditsStatus } from "./_lib/cmc.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {

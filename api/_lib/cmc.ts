@@ -1,4 +1,4 @@
-import { redis } from "./redis";
+import { redis } from "./redis.js";
 
 const CMC_BASE_URL = "https://pro-api.coinmarketcap.com";
 const MONTHLY_BUDGET_LIMIT = 15000;

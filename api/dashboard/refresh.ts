@@ -1,5 +1,5 @@
-import type { ApiRequest, ApiResponse } from "../_lib/types";
-import { ingestGlobalData, ingestFearGreedData, ingestListingsData } from "../_lib/ingest-helper";
+import type { ApiRequest, ApiResponse } from "../_lib/types.js";
+import { ingestGlobalData, ingestFearGreedData, ingestListingsData } from "../_lib/ingest-helper.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {

@@ -1,6 +1,6 @@
-import type { ApiRequest, ApiResponse, OverviewResponse, GlobalMarketData, FearGreedData, MarketMoverCoin } from "../_lib/types";
-import { redis } from "../_lib/redis";
-import { ingestGlobalData, ingestFearGreedData } from "../_lib/ingest-helper";
+import type { ApiRequest, ApiResponse, OverviewResponse, GlobalMarketData, FearGreedData, MarketMoverCoin } from "../_lib/types.js";
+import { redis } from "../_lib/redis.js";
+import { ingestGlobalData, ingestFearGreedData } from "../_lib/ingest-helper.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "GET") {

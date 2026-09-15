@@ -1,6 +1,6 @@
-import type { ApiRequest, ApiResponse, ListingsResponse, CoinItem } from "../_lib/types";
-import { redis } from "../_lib/redis";
-import { ingestListingsData } from "../_lib/ingest-helper";
+import type { ApiRequest, ApiResponse, ListingsResponse, CoinItem } from "../_lib/types.js";
+import { redis } from "../_lib/redis.js";
+import { ingestListingsData } from "../_lib/ingest-helper.js";
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "GET") {
