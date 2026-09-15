@@ -1,6 +1,55 @@
+# Environment & Secrets (NEVER COMMIT)
 .env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
 
-# Python
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production Build
+dist/
+dist-ssr/
+build/
+.vercel
+
+# Cache & Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+.eslintcache
+
+# Zero-Copy Architecture: No raw data or DB files committed
+*.csv
+*.db
+*.sqlite
+data/
+csv/
+database/*.db
+database/*.sqlite
+analysis/cleaned-data/
+analysis/database/
+latest-data/
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python legacy ignore
 __pycache__/
 *.pyc
 *.pyo
@@ -10,13 +59,3 @@ env/
 venv/
 *.ipynb_checkpoints/
 .ipynb_checkpoints/
-dist/
-build/
-*.egg-info/
-
-# Database
-database/*.db
-database/*.sqlite
-
-# Logs
-*.log

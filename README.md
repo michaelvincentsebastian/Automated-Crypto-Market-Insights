@@ -1,288 +1,161 @@
-# Crypto Analytics Dashboard 📈
+# cryptsight
 
-A robust, automated cryptocurrency data pipeline that collects, analyzes, and visualizes real-time market data from CoinMarketCap API. Built with Python, automated via GitHub Actions, and deployed on Streamlit Cloud.
+[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Upstash Redis](https://img.shields.io/badge/Upstash-Redis-00E699?logo=redis&logoColor=white)](https://upstash.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Serverless-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 
-### **[Streamlit Dashboard 🌐](https://coinmarketcapanalyticsdashboard.streamlit.app/)**
+A modern, high-performance cryptocurrency market intelligence dashboard built with a **zero-copy ingestion architecture**, integrated credit circuit breaker, educational tooltips for domain learners, and automated scheduler decoupled from Git history.
 
 ---
 
-## 🎯 What This Does
+## 💡 Mengapa Versi 2 (v2 Revamp)?
 
-This system automatically fetches cryptocurrency market data every 6 minutes, processes it, and presents it through an interactive web dashboard - all without manual intervention. Think of it as your personal crypto market analyst that never sleeps.
+Versi pertama project ini (Python + Streamlit + GitHub Actions cron tiap 6 menit) memiliki dua kelemahan mendasar:
+1. **Histori Commit Palsu**: GitHub Actions melakukan auto-commit file CSV setiap 6 menit, membuat grafik kontribusi Git menjadi sangat padat secara semu.
+2. **Pipeline Redundan (Multi-Hop)**: `API → Script Python → CSV → SQLite → Streamlit` (5 hop) menghasilkan duplikasi representasi data yang tidak efisien.
+
+### Perbandingan Arsitektur:
+
+| Aspek | v1 (Legacy) | v2 (Zero-Copy) |
+|---|---|---|
+| **Alur Data** | API → CSV → SQLite → Streamlit (5 hop) | API → Redis Cache → Frontend (2 hop) |
+| **Scheduler** | GitHub Actions (auto-commit tiap 6 mnt) | Vercel Cron Jobs (di luar Git) |
+| **Penyimpanan** | File CSV & SQLite di disk/repo git | Upstash Redis KV Store dengan TTL |
+| **Frontend** | Streamlit (Python server-rendered) | React + Vite + TypeScript (SPA) |
+| **UI & Desain** | Default Streamlit widgets | Custom shadcn/ui + Tailwind Dark Crypto theme |
+| **Domain Learning** | Hanya angka tanpa penjelasan | Micro-explanation tooltips di setiap metrik pasar |
+| **Budget Safety** | Tanpa kontrol kuota | Circuit breaker otomatis saat credit ≥ 90% |
 
 ---
 
-## 🚀 Key Features
+## 🚀 Fitur Utama
 
-- **Automated Data Collection**: Fetches top 100 cryptocurrencies data every 6 minutes
-- **Real-time Dashboard**: Live web dashboard with automatic refresh
-- **Zero Maintenance**: Fully automated workflow using GitHub Actions
-- **Professional Analytics**: Market metrics, top gainers/losers, volume leaders
-- **Historical Analysis**: Integrated TradingView charts for technical analysis
+- **⚡ Zero-Copy Ingestion**: Data dari CoinMarketCap API langsung masuk ke cache Redis siap pakai dengan TTL eksplisit. Tidak ada perantara CSV/SQLite.
+- **📊 Global Market Overview**: Total Market Cap, 24h Trading Volume, BTC Dominance, ETH Dominance, dan Active Cryptocurrencies.
+- **🧭 Fear & Greed Index**: Gauge visual SVG (skor 0–100) dengan label sentimen (*Extreme Fear* s/d *Extreme Greed*) dan analisis sentimen pasar.
+- **🔥 Top Gainers & Losers**: 5 koin dengan kenaikan dan penurunan harga tertinggi dalam 24 jam terakhir (dihitung in-memory dari data listings).
+- **🏆 Top 100 Coin Rankings**: Tabel interaktif lengkap dengan logo koin, rank, harga, % perubahan (1h, 24h, 7d), volume 24 jam, dan kapitalisasi pasar.
+  - *Sortable*: Urutkan berdasarkan rank, nama, harga, persentase, volume, atau market cap.
+  - *Searchable*: Filter instan berdasarkan nama atau simbol koin.
+  - *Responsive*: Kolom sekunder disesuaikan otomatis untuk tampilan mobile.
+- **⭐ Local Watchlist**: Pin koin favorit langsung dari tabel atau panel detail, disimpan secara persisten di browser (`localStorage`) tanpa perlu register/login.
+- **🔍 Coin Detail Sheet**: Panel drawer samping menampilkan harga besar, grafik sparkline (*self-collected price trend*), metrik pasokan (*Circulating*, *Total*, *Max Supply*, *FDV*), deskripsi resmi, serta link eksplorer & whitepaper.
+- **🎓 Domain Education Tooltips**: Micro-explanation ramah pemula pada setiap istilah finansial crypto (Market Cap, Dominance, Circulating Supply, FDV, dll).
+- **🛡️ Budget Circuit Breaker & Health Modal**: Pelacakan penggunaan credit bulanan CMC (15.000 credit/bulan) dengan auto-halt pada 90% (13.500 credits) untuk menjaga budget free tier tetap aman.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Data Source** | CoinMarketCap API | Real-time crypto market data |
-| **Automation** | GitHub Actions | Cloud-based scheduled execution |
-| **Processing** | Python (pandas, requests) | Data transformation & cleaning |
-| **Dashboard** | Streamlit | Interactive web interface |
-| **Deployment** | Streamlit Cloud | Free hosting with auto-sync |
-| **Storage** | GitHub Repository | Version-controlled data storage |
+- **Frontend**: React 18, Vite 5, TypeScript, Tailwind CSS, shadcn/ui, Lucide Icons, Recharts
+- **State & Data Fetching**: TanStack Query (React Query v5)
+- **Backend / Serverless**: Vercel Serverless Functions (Node.js / TypeScript)
+- **Cache / Storage**: Upstash Redis (REST API)
+- **Scheduler**: Vercel Cron Jobs
+- **Hosting**: Vercel
 
 ---
 
-## 📁 Project Structure
+## 📁 Struktur Direktori
 
 ```
-automated-crypto-market/
-├── .github/
-│   └── workflows/
-│       └── scheduled-data-refresh.yml    # GitHub Actions automation
-├── .gitignore
-├── analysis/
-│   ├── cleaned-data/
-│   │   └── cleaned_data.csv             # Processed data for analysis
-│   ├── database/
-│   │   └── crypto_data.db               # Local SQLite database
-│   └── local-automation/
-│       └── csv_collector.py              # Local data collector script
-├── dashboard/
-│   └── dashboard.py                      # Streamlit dashboard application
-├── img-resources/
-│   └── icon-website.png                  # favicon assets
-├── latest-data/
-│   ├── cmc_latest_data_puller.py        # API data fetcher
-│   └── latest_data.csv                   # Current market snapshot
-├── scripts/
-│   └── create_data.ipynb                # Jupyter notebook for analysis
-├── requirements.txt                       # Python dependencies
-└── README.md
+Automated-Crypto-Market-Insights/
+├── api/                           # Vercel Serverless Functions
+│   ├── _lib/
+│   │   ├── cmc.ts                 # CMC client, budget tracker & circuit breaker
+│   │   ├── redis.ts               # Upstash Redis client + dev fallback
+│   │   └── types.ts               # Shared backend/frontend TypeScript types
+│   ├── dashboard/                 # Endpoint baca data untuk frontend (Read-only)
+│   │   ├── coin.ts                # GET /api/dashboard/coin?id=...
+│   │   ├── listings.ts            # GET /api/dashboard/listings (Top 100)
+│   │   └── overview.ts            # GET /api/dashboard/overview (Global, FGI, Movers)
+│   ├── ingest/                    # Endpoint cron ingest data CMC ke Redis
+│   │   ├── feargreed.ts           # Cron tiap 30 menit
+│   │   ├── global.ts              # Cron tiap 30 menit
+│   │   └── listings.ts            # Cron tiap 10 menit
+│   └── health.ts                  # GET /api/health (status credit & ingest)
+├── src/                           # Frontend React SPA
+│   ├── components/
+│   │   └── ui/                    # Komponen UI (card, table, sheet, tooltip, badge, dll)
+│   ├── features/
+│   │   ├── detail/                # CoinDetailSheet & sparkline chart
+│   │   ├── health/                # HealthModal & credit monitor
+│   │   ├── listings/              # CoinTable & search/sort/filter
+│   │   └── overview/              # MarketHeader, StatCards, FearGreedGauge, MoversCards
+│   ├── lib/                       # Formatters, glossary edukasi, watchlist hook
+│   ├── types/                     # Frontend types
+│   ├── App.tsx                    # Root App component
+│   ├── index.css                  # Tailwind styles & dark mode palette
+│   └── main.tsx                   # React root entrypoint
+├── instructions/                  # Dokumen spesifikasi refaktor
+│   ├── architecture.md
+│   ├── design.md
+│   ├── prd.md
+│   ├── rules.md
+│   └── schema.md
+├── .env.example                   # Template environment variables
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+├── vercel.json                    # Konfigurasi Vercel Cron & rewrites
+└── vite.config.ts                 # Vite config + local API dev middleware
 ```
 
 ---
 
-## 🔄 How It Works
+## ⚙️ Panduan Menjalankan Project
 
-### The Data Flow
+### 1. Prasyarat
+- Node.js v18 atau lebih baru
+- npm v9 atau lebih baru
 
-1. **Scheduled Trigger**: GitHub Actions runs every 6 minutes (`cron: '*/6 * * * *'`)
-2. **API Call**: Python script fetches latest data from CoinMarketCap
-3. **Data Processing**: Raw JSON is cleaned and structured into CSV format
-4. **Auto-commit**: GitHub Actions commits updated data back to repository
-5. **Dashboard Refresh**: Streamlit Cloud detects changes and updates the live dashboard
-
-### Core Components Explained
-
-#### Data Fetcher (`cmc_latest_data_puller.py`)
-```python
-def fetch_data(limit=100):
-    """Simple API call with error handling"""
-    url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
-    headers = {'X-CMC_PRO_API_KEY': os.getenv('CMC_PRO_API_KEY')}
-    response = requests.get(url, headers=headers, params={'limit': limit})
-    return response.json()
-```
-This function handles the API communication. The API key is stored securely as a GitHub secret, never exposed in code.
-
-#### GitHub Actions Workflow
-```yaml
-on:
-  schedule:
-    - cron: '*/6 * * * *'  # Runs every 6 minutes
-permissions:
-  contents: write          # Required for auto-commit
-```
-The workflow needs write permissions to update the CSV file automatically. The `[skip ci]` tag in commit messages prevents infinite loops.
-
-#### Dashboard (`dashboard.py`)
-The dashboard uses `@st.cache_data(ttl=360)` for performance optimization, caching data for 6 minutes (matching our update frequency). It displays:
-- Global market metrics (total volume, market cap)
-- Top 5 gainers and losers
-- Interactive comparison charts
-- Real-time TradingView integration
-
----
-
-## 🚦 Quick Start
-
-### Prerequisites
-- GitHub account
-- CoinMarketCap API key (free tier works)
-- Streamlit Cloud account (free)
-
-### Setup Steps
-
-1. **Fork this repository**
-   ```bash
-   git clone https://github.com/yourusername/automated-crypto-market.git
-   cd automated-crypto-market
-   ```
-
-2. **Add API Key to GitHub Secrets**
-   - Go to Settings → Secrets → Actions
-   - Add new secret: `CMC_PRO_API_KEY` = `your-api-key-here`
-
-3. **Deploy to Streamlit Cloud**
-   - Connect your GitHub repo to Streamlit Cloud
-   - Deploy from `dashboard/dashboard.py`
-   - Dashboard auto-updates when data changes
-
-4. **Enable GitHub Actions**
-   - Go to Actions tab in your repo
-   - Enable workflows if prompted
-
-That's it! Your dashboard will start updating automatically.
-
----
-
-## 📊 Dashboard Features
-
-### Market Overview
-- **Global Metrics**: Total trading volume and market capitalization
-- **Price Movements**: Real-time percentage changes (1h, 24h, 7d)
-- **Volume Leaders**: Top cryptocurrencies by trading activity
-
-### Interactive Analysis
-- **Custom Comparisons**: Select multiple coins to compare metrics
-- **Historical Charts**: Embedded TradingView widgets for technical analysis
-- **Data Table**: Sortable, searchable complete dataset
-
-### Visual Design
-- **Responsive Layout**: Works on desktop, tablet, and mobile
-- **Dark Theme**: Easy on the eyes for extended viewing
-- **Smooth Animations**: Professional UI transitions
-
----
-
-## 💻 Local Development
-
-### Running Dashboard Locally
+### 2. Instalasi Dependensi
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run Streamlit app
-streamlit run dashboard/dashboard.py
+npm install
 ```
 
-### Local Data Collection Setup
-For continuous data collection on your local machine:
-
+### 3. Konfigurasi Environment Variable
+Salin template `.env.example` menjadi `.env`:
 ```bash
-# Navigate to analysis folder
-cd analysis/local-automation
-
-# Run collector (or set up with Task Scheduler)
-python csv_collector.py
+cp .env.example .env
 ```
 
----
-
-## ⚙️ Configuration
-
-### Environment Variables
-Create `.env` file for local development:
+Isi variabel di `.env` (opsional untuk dev lokal; jika dikosongkan, aplikasi akan menggunakan mock data otomatis):
 ```env
-CMC_PRO_API_KEY=your_api_key_here
+CMC_API_KEY=your_coinmarketcap_api_key
+UPSTASH_REDIS_REST_URL=https://your-database.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_upstash_token
+CRON_SECRET=your_optional_cron_secret
 ```
 
-### Custom Update Intervals
-Modify the cron schedule in `.github/workflows/scheduled-data-refresh.yml`:
-```yaml
-- cron: '*/15 * * * *'  # Every 15 minutes
-- cron: '0 * * * *'     # Every hour
+### 4. Menjalankan di Lingkungan Lokal (Local Development)
+```bash
+npm run dev
 ```
+Buka browser di `http://localhost:3000/`. Server dev Vite sudah dilengkapi middleware otomatis yang melayani endpoint `/api/*` secara transparan.
 
-### Adding More Coins
-Change the limit in `cmc_latest_data_puller.py`:
-```python
-raw_data = fetch_data(limit=200)  # Fetch top 200 coins
-```
-
----
-
-## 📈 Data Analysis Workflow
-
-### Local Analysis Pipeline
-1. **Data Collection**: `csv_collector.py` → SQLite database
-2. **Data Extraction**: Database → `cleaned_data.csv`
-3. **Analysis**: Jupyter notebooks in `scripts/`
-4. **Visualization**: Generate charts with matplotlib/seaborn
-
-### Sample Analysis Code
-```python
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Load cleaned data
-df = pd.read_csv('analysis/cleaned-data/cleaned_data.csv')
-
-# Calculate volatility
-df['volatility'] = df['percent_change_24h'].abs()
-
-# Top 10 most volatile coins
-top_volatile = df.nlargest(10, 'volatility')
+### 5. Membangun untuk Produksi (Production Build)
+```bash
+npm run build
 ```
 
 ---
 
-## ⚠️ Current Limitations
+## ☁️ Deployment ke Vercel
 
-1. **Update Frequency**: Limited to 6-minute intervals (GitHub Actions constraint)
-2. **Historical Data**: Dashboard shows only current snapshot (use local workflow for historical analysis)
-3. **API Rate Limits**: Free tier limits may apply for heavy usage
-4. **Data Gaps**: Local collection depends on machine uptime
-
----
-
-## 🚀 Future Enhancements
-
-- **24/7 Data Collection**: Implement AWS Lambda for gap-free historical data
-- **Technical Indicators**: Add RSI, MACD, Bollinger Bands calculations
-- **Alert System**: Telegram/Slack notifications for price movements
-- **Machine Learning**: Price prediction models using historical data
-- **Portfolio Tracking**: Personal portfolio management features
-- **Multi-exchange Support**: Aggregate data from multiple exchanges
+1. Push kode ke repository GitHub Anda (cabang `main`).
+2. Import repository di dashboard [Vercel](https://vercel.com/).
+3. Hubungkan integrasi **Upstash Redis** melalui Vercel Marketplace (variabel `UPSTASH_REDIS_REST_URL` dan `UPSTASH_REDIS_REST_TOKEN` akan otomatis terkonfigurasi).
+4. Tambahkan `CMC_API_KEY` pada menu **Project Settings > Environment Variables** di Vercel.
+5. Klik **Deploy**. Penjadwalan cron akan otomatis aktif sesuai definisi di `vercel.json`:
+   - `/api/ingest/listings` berjalan setiap 10 menit
+   - `/api/ingest/global` berjalan setiap 30 menit
+   - `/api/ingest/feargreed` berjalan setiap 30 menit
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-### Development Guidelines
-- Follow PEP 8 for Python code
-- Add tests for new features
-- Update documentation for API changes
-- Create feature branches from `main`
-
----
-
-## 📝 License
-
-MIT License - feel free to use this project for personal or commercial purposes.
-
----
-
-## 🙏 Acknowledgments
-
-- CoinMarketCap for providing comprehensive crypto data
-- Streamlit team for the amazing framework
-- GitHub Actions for free CI/CD
-- TradingView for embeddable charts
-
----
-
-## 📧 Contact
-
-For questions or suggestions, please open an issue or contact via [LinkedIn](https://www.linkedin.com/in/michaelvincentsebastian/) 😄.
-
----
-
-**Note**: This project is for educational purposes. Always do your own research before making investment decisions.
-
-Built with ❤️ by developers who believe in open-source and transparent crypto analytics.
+## 📜 Lisensi
+MIT License. Dibuat oleh Vincent.
